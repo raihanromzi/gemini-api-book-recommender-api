@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form Rekomendasi Buku dengan Neo Brutalism</title>
+    <style>
+      html {
+        background-color: #ffcc00;
+        font-family: sans-serif;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .container {
+        background-color: #ffffff;
+        border: 5px solid #000000;
+        padding: 4rem;
+        max-width: 600px;
+        width: 100%;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #000000;
+      }
+
+      p {
+        font-size: 1.2rem;
+        color: #000000;
+        margin-bottom: 2rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      label {
+        font-size: 1.2rem;
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #000000;
+      }
+
+      input[type="text"],
+      select {
+        font-family: sans-serif;
+        font-size: 1.2rem;
+        width: calc(100% - 20px);
+        padding: 0.5rem;
+        border: 3px solid #000000;
+        background-color: #ffffff;
+        color: #000000;
+        margin-bottom: 1rem;
+        display: block;
+      }
+
+      button {
+        font-size: 1.2rem;
+        background-color: #000000;
+        color: #ffcc00;
+        padding: 0.7rem 1.5rem;
+        border: 3px solid #000000;
+        cursor: pointer;
+        text-transform: uppercase;
+        width: 100%;
+      }
+
+      button:disabled {
+        background-color: #808080;
+        color: #ffffff;
+        border-color: #808080;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Rekomendasi Buku</h1>
+      <p>
+        Masukkan genre, buku favorit, dan tema yang Anda sukai untuk mendapatkan
+        rekomendasi buku yang sesuai.
+      </p>
+      <div class="form-group">
+        <label for="genre">Genre Favorit</label>
+        <input
+          type="text"
+          id="genre"
+          name="genre"
+          placeholder="Masukkan genre favorit Anda"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="favoriteBook">Buku Favorit</label>
+        <input
+          type="text"
+          id="favoriteBook"
+          name="favoriteBook"
+          placeholder="Sebutkan buku favorit Anda"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="theme">Tema buku</label>
+        <input
+          type="text"
+          id="theme"
+          name="theme"
+          placeholder="Tema yang Anda sukai"
+        />
+      </div>
+      <button id="recommendButton">Dapatkan Rekomendasi</button>
+      <div id="suggestion" style="margin-top: 2rem">
+        <h3>Rekomendasi</h3>
+        <p id="responseText"></p>
+      </div>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const suggestion = document.getElementById("suggestion");
+        const genre = document.getElementById("genre");
+        const favoriteBook = document.getElementById("favoriteBook");
+        const theme = document.getElementById("theme");
+        const recommendButton = document.getElementById("recommendButton");
+        const responseText = document.getElementById("responseText");
+
+        suggestion.style.display = "none";
+
+        const inputs = [genre, favoriteBook, theme];
+
+        inputs.forEach((input) => {
+          input.addEventListener("input", function () {
+            recommendButton.disabled =
+              !genre.value.trim() || !favoriteBook.value.trim();
+          });
+        });
+
+        recommendButton.addEventListener("click", async function () {
+          await getRecommendations();
+        });
+
+        async function getRecommendations() {
+          recommendButton.textContent = "Menghasilkan rekomendasi...";
+          recommendButton.disabled = true;
+
+          const genreValue = genre.value.trim();
+          const favoriteBookValue = favoriteBook.value.trim();
+          const themeValue = theme.value.trim();
+
+          const endpoint = `http://localhost:8080/getbooks?genre=${encodeURIComponent(
+            genreValue
+          )}&favoriteBook=${encodeURIComponent(
+            favoriteBookValue
+          )}&theme=${encodeURIComponent(themeValue)}`;
+
+          const response = await fetch(endpoint, {
+            method: "GET",
+          });
+
+          const result = await response.json();
+          responseText.innerHTML = `${result.answer || "No results found."}`;
+
+          suggestion.style.display = "block";
+          recommendButton.textContent = "Dapatkan Rekomendasi";
+          recommendButton.disabled = false;
+          genre.focus();
+        }
+      });
+    </script>
+  </body>
+</html>
